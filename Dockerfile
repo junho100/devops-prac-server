@@ -1,5 +1,5 @@
 # 빌드 스테이지
-FROM golang:1.21-alpine AS builder
+FROM golang:1.23.3-alpine3.20 AS builder
 
 WORKDIR /app
 
