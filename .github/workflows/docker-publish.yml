@@ -10,6 +10,7 @@ env:
   # DockerHub 사용자 이름으로 변경해주세요
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   IMAGE_NAME: devops-prac-server
+  K8S_REPO: junho100/devops-prac-k8s
 
 jobs:
   build-and-push:
@@ -54,3 +55,34 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  update-k8s-repo:
+    needs: build-and-push
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get short SHA
+        id: sha
+        run: echo "short_sha=$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Checkout K8s repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.K8S_REPO }}
+          token: ${{ secrets.GH_PAT }}
+          path: k8s-repo
+
+      - name: Update image tag in values.yaml
+        run: |
+          cd k8s-repo/charts/server/server
+          sed -i "s/tag: \".*\"/tag: \"sha-${{ steps.sha.outputs.short_sha }}\"/" values.yaml
+          cat values.yaml
+
+      - name: Commit and push changes
+        run: |
+          cd k8s-repo
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update server image tag to sha-${{ steps.sha.outputs.short_sha }}"
+          git push
