@@ -41,6 +41,12 @@ type LogEntry struct {
 // 서비스 이름 환경 변수
 var serviceName = os.Getenv("SERVICE_NAME")
 
+// 로깅을 비활성화할 경로 목록
+var skipLoggingPaths = map[string]bool{
+	"/":       true,
+	"/health": true,
+}
+
 func init() {
 	// 서비스 이름이 설정되지 않았으면 기본값 사용
 	if serviceName == "" {
@@ -51,6 +57,12 @@ func init() {
 // LoggerMiddleware Gin 미들웨어 - 요청/응답 로깅
 func LoggerMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// 로깅을 건너뛸 경로인지 확인
+		if skipLoggingPaths[c.Request.URL.Path] {
+			c.Next()
+			return
+		}
+
 		// 요청 시작 시간
 		startTime := time.Now()
 
