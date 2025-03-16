@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
 	// Gin 라우터 생성
 	r := gin.New() // Default() 대신 New()를 사용하여 기본 미들웨어 제외
 
@@ -40,9 +41,6 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-
-	// 서버 시작
-	log.Printf("서버가 :%s 포트에서 시작됩니다...", port)
 	if err := r.Run(":" + port); err != nil {
 		log.Fatalf("서버 시작 실패: %v", err)
 	}
