@@ -29,7 +29,7 @@ func main() {
 	// 루트 경로 핸들러
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "DevOps 인프라 테스트용 서버가 실행 중입니다.",
+			"message": "DevOps 인프라 테스트용 서버가 실행 중입니다!",
 		})
 	})
 
